@@ -4,8 +4,6 @@ class GameLoopMixin:
     def update(self, dt):
         """Главный диспетчер игрового цикла"""
 
-        print(self.obstacles.keys())
-
         # 1. Фаза ввода (Управление)
         self._process_input()
 
