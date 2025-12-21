@@ -16,29 +16,27 @@ from kivy.core.window import Window
 # Импортируем наш класс игры из нового файла
 from game import SurvivalSnakeGame
 
+# main.py
+from interface.menu_drawer import GameInterfaceManager
+
 
 class SnakeSurvivalApp(MDApp):
     def build(self):
-        self.theme_cls.theme_style = "Dark"
-
-        if platform != 'android':
-            Window.size = (400, 890)
-            Window.top = 50
-
-        # Корневой экран
+        # ... настройки темы и окна ...
         self.root_screen = MDScreen()
 
-        # Создаем игру
+        # 1. Инициализируем игру
         self.game = SurvivalSnakeGame()
         self.root_screen.add_widget(self.game)
 
-        # Слой UI (поверх игры)
-        self.ui_layer = MDFloatLayout()
-        self.root_screen.add_widget(self.ui_layer)
+        # 2. Инициализируем интерфейс
+        self.ui_manager = GameInterfaceManager()
+        self.ui_manager.setup_ui(self.root_screen)
 
-        # Запуск цикла (60 FPS)
+        # Приложение запоминает состояние для игры
+        self.game_ui = self.ui_manager
+
         Clock.schedule_interval(self.game.update, 1 / 60.0)
-
         return self.root_screen
 
 

@@ -34,6 +34,20 @@ class SurvivalSnakeGame(Widget, GameRendererMixin, SnakePhysicsMixin,
         self.init_world_map()
 
     def on_touch_down(self, touch):
+        from kivymd.app import MDApp
+        app = MDApp.get_running_app()
+
+        # Проверка через наш новый интерфейс
+        if hasattr(app, 'game_ui') and app.game_ui.is_menu_open():
+            # Если кликнули вне меню (в правую часть экрана) — закрываем его
+            if touch.x > Window.width / 2:
+                app.game_ui.toggle_menu()
+            return True
+
+        # Игнорируем зону кнопки
+        if touch.x < 100 and touch.y > Window.height - 100:
+            return super().on_touch_down(touch)
+
         self.is_touching = True
         self.touch_screen_pos = [touch.x, touch.y]
         return True
