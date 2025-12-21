@@ -1,6 +1,9 @@
 import os
 from kivy.config import Config
 
+from logic.physics import SnakePhysicsMixin
+from logic.renderer import GameRendererMixin
+
 # Настройки окна для ПК (имитация POCO X7 Pro)
 Config.set('graphics', 'width', '400')
 Config.set('graphics', 'height', '890')
@@ -16,7 +19,7 @@ from kivy.utils import platform
 
 
 # --- КЛАСС ИГРЫ ---
-class SurvivalSnakeGame(Widget):
+class SurvivalSnakeGame(Widget, GameRendererMixin, SnakePhysicsMixin):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # Базовые переменные (физика и мир)
@@ -25,34 +28,41 @@ class SurvivalSnakeGame(Widget):
         self.is_touching = False
         self.touch_screen_pos = [0, 0]
 
+        # Инициализируем переменные из миксина физики
+        self.init_physics()
+
         # Заглушки для будущих систем
         self.camera_zoom = 1.0
 
     def update(self, dt):
+        # Если координаты меняются в консоли — значит физика работает!
+        print(f"X: {int(self.world_x)} Y: {int(self.world_y)}")
         # 1. Логика управления
         if self.is_touching:
-            # Учитываем центр экрана для расчета цели
+            zoom = self.camera_zoom
             rel_x = self.touch_screen_pos[0] - Window.width / 2
             rel_y = self.touch_screen_pos[1] - Window.height / 2
-            self.target_x = self.world_x + (rel_x / self.camera_zoom)
-            self.target_y = self.world_y + (rel_y / self.camera_zoom)
+            self.target_x = self.world_x + (rel_x / zoom)
+            self.target_y = self.world_y + (rel_y / zoom)
 
         # 2. Здесь будут вызовы систем: move_head(), check_collisions() и т.д.
+        self.apply_inertia()
 
         # 3. Отрисовка (пока заглушка)
         self.draw_canvas()
 
-    def draw_canvas(self):
-        # Метод будет наполнен через GameRendererMixin
-        pass
+    # def draw_canvas(self):
+    #     # Метод будет наполнен через GameRendererMixin
+    #     pass
 
     def on_touch_down(self, touch):
         self.is_touching = True
         self.touch_screen_pos = [touch.x, touch.y]
-        return True
+        return True # ВАЖНО: сообщает системе, что нажатие обработано здесь
 
     def on_touch_move(self, touch):
         self.touch_screen_pos = [touch.x, touch.y]
+        return True
 
     def on_touch_up(self, touch):
         self.is_touching = False
