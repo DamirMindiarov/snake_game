@@ -7,10 +7,11 @@ from logic.renderer import GameRendererMixin
 from logic.physics import SnakePhysicsMixin
 from logic.snake_movement import SnakeMovementMixin
 from logic.engine.game_loop import GameLoopMixin
+from logic.world_map import WorldMapMixin
 
 
 class SurvivalSnakeGame(Widget, GameRendererMixin, SnakePhysicsMixin,
-                        SnakeMovementMixin, GameLoopMixin):
+                        SnakeMovementMixin, GameLoopMixin, WorldMapMixin ):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -28,6 +29,8 @@ class SurvivalSnakeGame(Widget, GameRendererMixin, SnakePhysicsMixin,
         # Параметры бури (для будущего)
         self.storm_alpha = 0.0
         self.storm_phase = "idle"
+
+        self.init_world_map()
 
     def on_touch_down(self, touch):
         self.is_touching = True

@@ -4,6 +4,8 @@ class GameLoopMixin:
     def update(self, dt):
         """Главный диспетчер игрового цикла"""
 
+        print(self.obstacles.keys())
+
         # 1. Фаза ввода (Управление)
         self._process_input()
 
@@ -40,5 +42,5 @@ class GameLoopMixin:
 
     def _process_world_events(self, dt):
         """Обработка игровых событий"""
-        # Пока здесь будет пусто, сюда добавим check_map_generation и еду
+        self.check_map_generation()
         pass
