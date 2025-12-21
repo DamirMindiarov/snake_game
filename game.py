@@ -1,71 +1,76 @@
 # game.py
 from kivy.uix.widget import Widget
+from kivy.graphics import Color, Rectangle, PushMatrix, PopMatrix, Translate, Scale
 from kivy.core.window import Window
+import time
 
-from logic.collisions import CollisionMixin
-from logic.food_system import FoodSystemMixin
-# Импортируем все наши миксины
-from logic.renderer import GameRendererMixin
-from logic.physics import SnakePhysicsMixin
-from logic.snake_movement import SnakeMovementMixin
-from logic.engine.game_loop import GameLoopMixin
-from logic.world_map import WorldMapMixin
+from logic.core.system_manager import SystemManager
 
+# Импорты будущих систем (создадим их в следующих шагах)
+from logic.systems.world_system import WorldSystem
+from logic.systems.snake_system import SnakeSystem
+from logic.systems.biomass_system import BiomassSystem
 
-class SurvivalSnakeGame(Widget, GameRendererMixin, SnakePhysicsMixin,
-                        SnakeMovementMixin, GameLoopMixin, WorldMapMixin, CollisionMixin, FoodSystemMixin ):
+class SurvivalSnakeGame(Widget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        # Общий стейт (Shared Data)
         self.world_x, self.world_y = 0.0, 0.0
         self.target_x, self.target_y = 0.0, 0.0
-
-        self.mutations = {
-            "predatory_snap": False  # Изначально выключена
-        }
-
-        # 1. ИНИЦИАЛИЗИРУЕМ ЕДУ В ПЕРВУЮ ОЧЕРЕДЬ
-        # Это создаст self.food_items и предотвратит ошибку
-        self.init_food()
-
-        # Инициализация систем
-        self.init_physics()
-        self.init_snake_data()
-
-        # Базовые параметры
+        self.camera_zoom = 0.6
         self.is_touching = False
         self.touch_screen_pos = [0.0, 0.0]
-        self.camera_zoom = 0.6
+        self.biomass_points = 0
+        self.damage_timer = 0.0
+        self.mutations = {"predatory_snap": False}
 
-        # Параметры бури (для будущего)
-        self.storm_alpha = 0.0
-        self.storm_phase = "idle"
+        # Менеджер систем
+        self.manager = SystemManager(self)
 
-        self.init_world_map()
+        # РЕГИСТРАЦИЯ СИСТЕМ (Пока закомментировано, добавим по одной)
+        self.world = self.manager.register(WorldSystem(self))
+        self.snake = self.manager.register(SnakeSystem(self))
+        self.biomass = self.manager.register(BiomassSystem(self))
+
+    def update(self, dt):
+        self.manager.update_all(dt)
+        self.draw_canvas()
+
+    def draw_canvas(self):
+        self.canvas.clear()
+        t = time.time()
+
+        # 1. Фон (теперь рисуем здесь или вынесем в BackgroundSystem)
+        with self.canvas:
+            Color(0.18, 0.28, 0.18, 1)
+            Rectangle(pos=(0, 0), size=(Window.width, Window.height))
+
+        # 2. Отрисовка систем в мировых координатах
+        with self.canvas:
+            PushMatrix()
+            Translate(Window.width / 2, Window.height / 2, 0)
+            Scale(self.camera_zoom, self.camera_zoom, 1)
+            Translate(-self.world_x, -self.world_y, 0)
+
+            self.manager.render_all(self.canvas, t, self.camera_zoom)
+
+            PopMatrix()
 
     def on_touch_down(self, touch):
         from kivymd.app import MDApp
         app = MDApp.get_running_app()
-
-        # Проверка через наш новый интерфейс
         if hasattr(app, 'game_ui') and app.game_ui.is_menu_open():
-            # Если кликнули вне меню (в правую часть экрана) — закрываем его
-            if touch.x > Window.width / 2:
-                app.game_ui.toggle_menu()
+            if touch.x > Window.width / 2: app.game_ui.toggle_menu()
             return True
-
-        # Игнорируем зону кнопки
-        if touch.x < 100 and touch.y > Window.height - 100:
-            return super().on_touch_down(touch)
+        if touch.x < 100 and touch.y > Window.height - 100: return super().on_touch_down(touch)
 
         self.is_touching = True
         self.touch_screen_pos = [touch.x, touch.y]
         return True
 
     def on_touch_move(self, touch):
-        if self.is_touching:
-            self.touch_screen_pos = [touch.x, touch.y]
-            return True
+        if self.is_touching: self.touch_screen_pos = [touch.x, touch.y]
 
     def on_touch_up(self, touch):
         self.is_touching = False
-        return True
