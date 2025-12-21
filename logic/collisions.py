@@ -24,3 +24,15 @@ class CollisionMixin:
             self.vel_y = 0
             self.damage_timer = 0.5
 
+    def handle_obstacle_hit(self, tx, ty, cx, cy):
+        # Если у змеи есть мутация 'crusher'
+        if getattr(self, 'has_crusher_mutation', False):
+            # Удаляем камень из данных
+            self.obstacles[(cx, cy)]["stones"].remove((tx, ty))
+            # Перерисовываем чанк
+            self.redraw_chunk(cx, cy)
+        else:
+            # Иначе — обычное столкновение и урон
+            self.damage_timer = 0.5
+            self.vel_x *= -0.5
+            self.vel_y *= -0.5
