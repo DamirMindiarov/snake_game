@@ -19,3 +19,12 @@ class SystemManager:
     def broadcast_chunk(self, cx, cy, chunk_data):
         for s in self.systems:
             s.on_chunk_generated(cx, cy, chunk_data)
+
+    # УНИВЕРСАЛЬНЫЙ ТРАНСЛЯТОР СОБЫТИЙ
+    def post_event(self, event_name, *args):
+        """Отправляет любое событие всем системам, у которых есть такой метод"""
+        for s in self.systems:
+            # Например, если event_name='on_touch_down', ищем метод on_touch_down
+            method = getattr(s, event_name, None)
+            if method:
+                method(*args)

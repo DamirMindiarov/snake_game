@@ -58,19 +58,30 @@ class SurvivalSnakeGame(Widget):
             PopMatrix()
 
     def on_touch_down(self, touch):
+        # 1. UI логика (оставляем тут, так как это уровень приложения)
         from kivymd.app import MDApp
         app = MDApp.get_running_app()
         if hasattr(app, 'game_ui') and app.game_ui.is_menu_open():
             if touch.x > Window.width / 2: app.game_ui.toggle_menu()
             return True
-        if touch.x < 100 and touch.y > Window.height - 100: return super().on_touch_down(touch)
 
+        # 2. Обновляем общее состояние
         self.is_touching = True
         self.touch_screen_pos = [touch.x, touch.y]
+
+        # 3. ТРАНСЛЯЦИЯ СОБЫТИЯ В СИСТЕМЫ
+        self.manager.post_event('on_touch_down', touch)
         return True
 
     def on_touch_move(self, touch):
-        if self.is_touching: self.touch_screen_pos = [touch.x, touch.y]
+        if self.is_touching:
+            self.touch_screen_pos = [touch.x, touch.y]
+            # ТРАНСЛЯЦИЯ
+            self.manager.post_event('on_touch_move', touch)
+        return True
 
     def on_touch_up(self, touch):
         self.is_touching = False
+        # ТРАНСЛЯЦИЯ
+        self.manager.post_event('on_touch_up', touch)
+        return True
