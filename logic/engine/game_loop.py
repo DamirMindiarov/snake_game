@@ -39,10 +39,10 @@ class GameLoopMixin:
             self.move_tail()
 
     def _process_world_events(self, dt):
-        # 1. Остывание таймера урона
+        # 1. СНАЧАЛА ЕДА (Прыжок)
+        self.check_food_snapping()
+
+        # 2. Потом остальное
         if getattr(self, 'damage_timer', 0) > 0:
             self.damage_timer -= dt
-
-        # 2. Генерация чанков
-        if hasattr(self, 'check_map_generation'):
-            self.check_map_generation()
+        self.check_map_generation()

@@ -17,6 +17,10 @@ class SurvivalSnakeGame(Widget, GameRendererMixin, SnakePhysicsMixin,
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        self.mutations = {
+            "predatory_snap": True  # Изначально выключена
+        }
+
         # 1. ИНИЦИАЛИЗИРУЕМ ЕДУ В ПЕРВУЮ ОЧЕРЕДЬ
         # Это создаст self.food_items и предотвратит ошибку
         self.init_food()

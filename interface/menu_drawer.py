@@ -1,6 +1,6 @@
 # interface/menu_drawer.py
 from kivymd.uix.floatlayout import MDFloatLayout
-from kivymd.uix.button import MDIconButton
+from kivymd.uix.button import MDIconButton, MDRaisedButton
 from kivymd.uix.label import MDLabel
 from kivy.core.window import Window
 
@@ -33,6 +33,14 @@ class GameInterfaceManager:
             text_color=(0, 1, 1, 1),
             font_style="H6"
         )
+        self.mutation_btn = MDRaisedButton(
+            text="Мутация: Хищный выпад (5 биомассы)",
+            pos_hint={"center_x": 0.5, "center_y": 0.8},
+            md_bg_color=(0, 0.5, 0.5, 1),
+            on_release=self.buy_snap_mutation
+        )
+        self.menu_panel.add_widget(self.mutation_btn)
+
         self.menu_panel.add_widget(self.title_label)
 
         # Статус для игры
@@ -55,3 +63,14 @@ class GameInterfaceManager:
 
     def is_menu_open(self):
         return self.is_open
+
+    def buy_snap_mutation(self, instance):
+        from kivymd.app import MDApp
+        game = MDApp.get_running_app().game
+
+        # Проверяем, хватает ли очков биомассы
+        if game.biomass_points >= 5 and not game.mutations["predatory_snap"]:
+            game.biomass_points -= 5
+            game.mutations["predatory_snap"] = True
+            instance.text = "Мутация: КУПЛЕНО"
+            instance.disabled = True

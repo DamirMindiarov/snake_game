@@ -24,6 +24,12 @@ class SnakePhysicsMixin:
                 self.vel_y += (dy / dist) * self.accel
 
         # Применяем трение, чтобы не лететь вечно
+        # Увеличь силу трения, если скорость экстремальная
+        v_sq = self.vel_x ** 2 + self.vel_y ** 2
+        if v_sq > 100:  # Если летим быстрее обычного
+            self.friction = 0.85  # Тормозим сильнее
+        else:
+            self.friction = 0.95  # Обычное торможение
         self.vel_x *= self.friction
         self.vel_y *= self.friction
 
