@@ -1,6 +1,6 @@
 # interface/menu_drawer.py
 from kivymd.uix.floatlayout import MDFloatLayout
-from kivymd.uix.button import MDIconButton, MDRaisedButton
+from kivymd.uix.button import MDIconButton, MDRaisedButton, MDFillRoundFlatButton
 from kivymd.uix.label import MDLabel
 from kivy.core.window import Window
 
@@ -33,10 +33,12 @@ class GameInterfaceManager:
             text_color=(0, 1, 1, 1),
             font_style="H6"
         )
-        self.mutation_btn = MDRaisedButton(
-            text="Мутация: Хищный выпад (5 биомассы)",
+        self.mutation_btn = MDFillRoundFlatButton(
+            text="РЫВОК: 5 БИО",
             pos_hint={"center_x": 0.5, "center_y": 0.8},
+            size_hint_x=0.8,  # Кнопка займет 80% от ширины МЕНЮ (которое само 0.5 экрана)
             md_bg_color=(0, 0.5, 0.5, 1),
+            font_style="Caption",  # Шрифт поменьше, чтобы не вылезал
             on_release=self.buy_snap_mutation
         )
         self.menu_panel.add_widget(self.mutation_btn)

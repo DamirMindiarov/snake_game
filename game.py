@@ -20,7 +20,7 @@ class SurvivalSnakeGame(Widget, GameRendererMixin, SnakePhysicsMixin,
         self.target_x, self.target_y = 0.0, 0.0
 
         self.mutations = {
-            "predatory_snap": True  # Изначально выключена
+            "predatory_snap": False  # Изначально выключена
         }
 
         # 1. ИНИЦИАЛИЗИРУЕМ ЕДУ В ПЕРВУЮ ОЧЕРЕДЬ
