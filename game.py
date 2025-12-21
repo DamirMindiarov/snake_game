@@ -16,6 +16,8 @@ class SurvivalSnakeGame(Widget, GameRendererMixin, SnakePhysicsMixin,
                         SnakeMovementMixin, GameLoopMixin, WorldMapMixin, CollisionMixin, FoodSystemMixin ):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.world_x, self.world_y = 0.0, 0.0
+        self.target_x, self.target_y = 0.0, 0.0
 
         self.mutations = {
             "predatory_snap": True  # Изначально выключена
@@ -30,8 +32,6 @@ class SurvivalSnakeGame(Widget, GameRendererMixin, SnakePhysicsMixin,
         self.init_snake_data()
 
         # Базовые параметры
-        self.world_x, self.world_y = 0.0, 0.0
-        self.target_x, self.target_y = 0.0, 0.0
         self.is_touching = False
         self.touch_screen_pos = [0.0, 0.0]
         self.camera_zoom = 0.6

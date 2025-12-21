@@ -1,25 +1,35 @@
 # logic/snake_movement.py
-from collections import deque
+import math
 
 
 class SnakeMovementMixin:
     def init_snake_data(self):
-        self.num_segments = 30
-        self.history_step = 5
-        # Очередь на C — работает мгновенно O(1)
-        # Заполняем сразу, чтобы не было пустых индексов
-        self.history = deque([[0.0, 0.0]] * (self.num_segments * self.history_step + 1),
-                             maxlen=1000)
-        self.segments = [[0.0, 0.0] for _ in range(self.num_segments)]
+        self.num_segments = 25
+        self.seg_dist = 18.0  # Жесткая дистанция между звеньями
+
+        sx, sy = getattr(self, 'world_x', 0.0), getattr(self, 'world_y', 0.0)
+        # Нам больше не нужна огромная история, только позиции сегментов
+        self.segments = [[sx, sy] for _ in range(self.num_segments)]
 
     def move_tail(self):
-        # appendleft в deque в десятки раз быстрее, чем list.insert(0)
-        self.history.appendleft([self.world_x, self.world_y])
+        # Первый сегмент следует за головой
+        leader_x, leader_y = float(self.world_x), float(self.world_y)
 
         for i in range(self.num_segments):
-            # Доступ по индексу в deque в Python 3.12+ очень быстрый
-            idx = (i + 1) * self.history_step
-            if idx < len(self.history):
-                # Обновляем координаты сегментов
-                self.segments[i][0] = self.history[idx][0]
-                self.segments[i][1] = self.history[idx][1]
+            seg = self.segments[i]
+
+            # Вектор от текущего сегмента к лидеру (голове или предыдущему сегменту)
+            dx = leader_x - seg[0]
+            dy = leader_y - seg[1]
+            dist = math.sqrt(dx ** 2 + dy ** 2)
+
+            if dist > self.seg_dist:
+                # Вычисляем, насколько нужно подвинуть сегмент, чтобы он
+                # сохранил дистанцию seg_dist до лидера
+                move_dist = dist - self.seg_dist
+                # Плавное перемещение вдоль вектора
+                seg[0] += (dx / dist) * move_dist
+                seg[1] += (dy / dist) * move_dist
+
+            # Следующий сегмент будет следовать за текущим
+            leader_x, leader_y = seg[0], seg[1]
