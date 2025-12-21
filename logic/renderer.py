@@ -26,7 +26,6 @@ class GameRendererMixin(WorldRenderLayer, SnakeRenderLayer):
             Translate(-self.world_x, -self.world_y, 0)
 
         # Вызываем слои (они сами зайдут в with self.canvas)
-        self._draw_grid(zoom)
         self._draw_obstacles(zoom)
         self._draw_snake(t)
 

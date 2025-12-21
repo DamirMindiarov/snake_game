@@ -39,6 +39,10 @@ class GameLoopMixin:
             self.move_tail()
 
     def _process_world_events(self, dt):
-        """Обработка игровых событий"""
-        self.check_map_generation()
-        pass
+        # 1. Остывание таймера урона
+        if getattr(self, 'damage_timer', 0) > 0:
+            self.damage_timer -= dt
+
+        # 2. Генерация чанков
+        if hasattr(self, 'check_map_generation'):
+            self.check_map_generation()

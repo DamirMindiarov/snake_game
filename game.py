@@ -2,6 +2,7 @@
 from kivy.uix.widget import Widget
 from kivy.core.window import Window
 
+from logic.collisions import CollisionMixin
 # Импортируем все наши миксины
 from logic.renderer import GameRendererMixin
 from logic.physics import SnakePhysicsMixin
@@ -11,7 +12,7 @@ from logic.world_map import WorldMapMixin
 
 
 class SurvivalSnakeGame(Widget, GameRendererMixin, SnakePhysicsMixin,
-                        SnakeMovementMixin, GameLoopMixin, WorldMapMixin ):
+                        SnakeMovementMixin, GameLoopMixin, WorldMapMixin, CollisionMixin ):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 

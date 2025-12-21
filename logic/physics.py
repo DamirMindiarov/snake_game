@@ -35,5 +35,12 @@ class SnakePhysicsMixin:
             self.vel_y *= scale
 
         # Обновляем координаты мира
-        self.world_x += self.vel_x
-        self.world_y += self.vel_y
+        # Вместо прямого self.world_x += self.vel_x
+        # Вызываем нашу новую проверку:
+        if hasattr(self, 'check_movement_with_collisions'):
+            self.check_movement_with_collisions(self.vel_x, self.vel_y)
+        else:
+            # Если коллизии не подключены — просто двигаемся
+            self.world_x += self.vel_x
+            self.world_y += self.vel_y
+

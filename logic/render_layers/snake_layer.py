@@ -11,5 +11,8 @@ class SnakeRenderLayer:
                     Ellipse(pos=(seg[0] - size/2, seg[1] - size/2), size=(size, size))
 
             h_size = 38 + math.sin(t * 3) * 2
-            Color(1, 0, 0, 1) if getattr(self, 'damage_timer', 0) > 0 else Color(1, 0.6, 0, 1)
-            Ellipse(pos=(self.world_x - h_size/2, self.world_y - h_size/2), size=(h_size, h_size))
+            # В методе _draw_snake
+            h_color = (1, 0, 0, 1) if getattr(self, 'damage_timer', 0) > 0 else (1, 0.6, 0, 1)
+            Color(*h_color)
+            Ellipse(pos=(self.world_x - h_size / 2, self.world_y - h_size / 2), size=(h_size, h_size))
+
