@@ -3,6 +3,7 @@ from kivy.config import Config
 
 from logic.physics import SnakePhysicsMixin
 from logic.renderer import GameRendererMixin
+from logic.snake_movement import SnakeMovementMixin
 
 # Настройки окна для ПК (имитация POCO X7 Pro)
 Config.set('graphics', 'width', '400')
@@ -19,20 +20,18 @@ from kivy.utils import platform
 
 
 # --- КЛАСС ИГРЫ ---
-class SurvivalSnakeGame(Widget, GameRendererMixin, SnakePhysicsMixin):
+class SurvivalSnakeGame(Widget, GameRendererMixin, SnakePhysicsMixin, SnakeMovementMixin):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # Базовые переменные (физика и мир)
+        # Инициализация всех систем
+        self.init_physics()  # Для vel_x, vel_y
+        self.init_snake_data()  # СОЗДАЕТ segments и history (ИСПРАВЛЯЕТ ОШИБКУ)
+
         self.world_x, self.world_y = 0, 0
         self.target_x, self.target_y = 0, 0
         self.is_touching = False
         self.touch_screen_pos = [0, 0]
-
-        # Инициализируем переменные из миксина физики
-        self.init_physics()
-
-        # Заглушки для будущих систем
-        self.camera_zoom = 1.0
+        self.camera_zoom = 0.6
 
     def update(self, dt):
         # Если координаты меняются в консоли — значит физика работает!
@@ -45,11 +44,10 @@ class SurvivalSnakeGame(Widget, GameRendererMixin, SnakePhysicsMixin):
             self.target_x = self.world_x + (rel_x / zoom)
             self.target_y = self.world_y + (rel_y / zoom)
 
-        # 2. Здесь будут вызовы систем: move_head(), check_collisions() и т.д.
-        self.apply_inertia()
-
-        # 3. Отрисовка (пока заглушка)
+        self.apply_inertia()  # Двигаем голову (меняем world_x, world_y)
+        self.move_tail()  # СРАЗУ записываем этот шаг в историю хвоста
         self.draw_canvas()
+
 
     # def draw_canvas(self):
     #     # Метод будет наполнен через GameRendererMixin

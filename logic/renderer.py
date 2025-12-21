@@ -33,7 +33,15 @@ class GameRendererMixin:
             for y in range(-2000, 2001, step):
                 Line(points=[-2000, y, 2000, y], width=1)
 
-            # 4. ГОЛОВА ЗМЕИ
+            #TAIL
+            if hasattr(self, 'segments'):
+                for i, seg in enumerate(self.segments):
+                    # seg[0] - это X, seg[1] - это Y
+                    size = 28 - (i * 0.4)
+                    Color(0.2, 0.8, 0.5, 1 - (i / len(self.segments)) * 0.6)
+                    Ellipse(pos=(seg[0] - size / 2, seg[1] - size / 2), size=(size, size))
+
+            # 5. ГОЛОВА (рисуем поверх хвоста)
             Color(1, 0.6, 0, 1)
             Ellipse(pos=(self.world_x - 20, self.world_y - 20), size=(40, 40))
 
