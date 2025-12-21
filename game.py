@@ -3,6 +3,7 @@ from kivy.uix.widget import Widget
 from kivy.core.window import Window
 
 from logic.collisions import CollisionMixin
+from logic.food_system import FoodSystemMixin
 # Импортируем все наши миксины
 from logic.renderer import GameRendererMixin
 from logic.physics import SnakePhysicsMixin
@@ -12,9 +13,13 @@ from logic.world_map import WorldMapMixin
 
 
 class SurvivalSnakeGame(Widget, GameRendererMixin, SnakePhysicsMixin,
-                        SnakeMovementMixin, GameLoopMixin, WorldMapMixin, CollisionMixin ):
+                        SnakeMovementMixin, GameLoopMixin, WorldMapMixin, CollisionMixin, FoodSystemMixin ):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        # 1. ИНИЦИАЛИЗИРУЕМ ЕДУ В ПЕРВУЮ ОЧЕРЕДЬ
+        # Это создаст self.food_items и предотвратит ошибку
+        self.init_food()
 
         # Инициализация систем
         self.init_physics()

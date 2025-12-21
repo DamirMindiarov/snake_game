@@ -1,11 +1,13 @@
 import time
 from kivy.graphics import Color, Rectangle, PushMatrix, PopMatrix, Translate, Scale
 from kivy.core.window import Window
+
+from logic.render_layers.food_layer import FoodRenderLayer
 from logic.render_layers.world_layer import WorldRenderLayer
 from logic.render_layers.snake_layer import SnakeRenderLayer
 
 # logic/renderer.py
-class GameRendererMixin(WorldRenderLayer, SnakeRenderLayer):
+class GameRendererMixin(WorldRenderLayer, SnakeRenderLayer, FoodRenderLayer):
     def draw_canvas(self):
         self.canvas.clear() # Очищаем главный холст
         t = time.time()
@@ -27,6 +29,7 @@ class GameRendererMixin(WorldRenderLayer, SnakeRenderLayer):
 
         # Вызываем слои (они сами зайдут в with self.canvas)
         self._draw_obstacles(zoom)
+        self._draw_food(zoom)
         self._draw_snake(t)
 
         with self.canvas:
