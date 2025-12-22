@@ -15,7 +15,7 @@ from logic.systems.stone_system import StoneSystem
 # Импорты будущих систем (создадим их в следующих шагах)
 from logic.systems.world_system import WorldSystem
 from logic.systems.snake_system import SnakeSystem
-from logic.systems.biomass_system import BiomassSystem
+
 
 class SurvivalSnakeGame(Widget):
     def __init__(self, **kwargs):
@@ -49,12 +49,11 @@ class SurvivalSnakeGame(Widget):
 
         self.fx = self.manager.register(FXSystem(self))
         self.snake = self.manager.register(SnakeSystem(self))
-        self.biomass = self.manager.register(BiomassSystem(self))
 
 
         # ПОДКЛЮЧЕНИЕ МУТАЦИИ
         self.dash_mutation = self.manager.register(MutationDashSystem(self))
-        self.snap_mut = self.manager.register(MutationSnapSystem(self))
+        # self.snap_mut = self.manager.register(MutationSnapSystem(self))
 
     def update(self, dt):
         self.manager.update_all(dt)

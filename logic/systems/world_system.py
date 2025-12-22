@@ -37,44 +37,36 @@ class WorldSystem(IGameSystem):
         cx, cy = int(x // px), int(y // px)
 
         if (cx, cy) not in self.game.generated_chunks:
-            # 1. Создаем пустую сетку чанка
             chunk_map = {}
-
-            # 2. Опрашиваем все системы (Nature, Stone и т.д.), чтобы они заполнили сетку
             for p in self.populators:
                 p.populate_chunk(cx, cy, chunk_map)
 
             self.game.world_map[(cx, cy)] = chunk_map
 
-            # 3. Готовим слои отрисовки
+            # 3. УДАЛИЛИ "food_graphics" отсюда
             layers = {
-                "layer_0": InstructionGroup(),  # Под змеей (камни, стволы)
-                "layer_1": InstructionGroup(),  # Над змеей (кроны)
-                "food_graphics": InstructionGroup()
+                "layer_0": InstructionGroup(),
+                "layer_1": InstructionGroup()
             }
             self.game.obstacles[(cx, cy)] = layers
 
-            # 4. "Запекаем" графику
             self.redraw_chunk(cx, cy)
             self.game.generated_chunks.add((cx, cy))
 
-            # Уведомляем еду (BiomassSystem), передавая только слой еды
+            # 4. ИСПРАВИЛИ: теперь просто уведомляем о новом чанке без специфики еды
             self.game.manager.broadcast_chunk(cx, cy, layers)
 
     def redraw_chunk(self, cx, cy):
-        """Полная перерисовка чанка на основе данных из world_map"""
         layers = self.game.obstacles.get((cx, cy))
         chunk_map = self.game.world_map.get((cx, cy), {})
         if not layers: return
 
-        # Очищаем слои перед перерисовкой
         layers["layer_0"].clear()
         layers["layer_1"].clear()
+        # Слой еды здесь больше не очищаем, так как его нет в словаре layers
 
-        # Просим каждую систему отрисовать свои ID в переданные слои
         for (tx, ty), obj_id in chunk_map.items():
             for p in self.populators:
-                # Передаем: ID объекта, координаты тайла, словарь слоев и размер тайла
                 p.draw_object(obj_id, tx, ty, layers, self.game.tile_size)
 
     def on_update(self, dt):
