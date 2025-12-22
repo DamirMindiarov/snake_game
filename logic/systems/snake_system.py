@@ -14,11 +14,19 @@ class SnakeSystem(IGameSystem):
         self.accel = 0.4
         self.friction = 0.95
 
-        # Параметры тела
+        # ПАРАМЕТРЫ ТЕЛА (Flat Array)
         self.game.num_segments = 25
         self.seg_dist = 18.0
-        # Инициализируем сегменты мировыми координатами головы
-        self.game.segments = [[self.game.world_x, self.game.world_y] for _ in range(self.game.num_segments)]
+
+        # Храним координаты как [x0, y0, x1, y1, x2, y2 ...]
+        # Это один непрерывный блок памяти. Никаких вложенных списков.
+        self.game.snake_data = [0.0] * (self.game.num_segments * 2)
+
+        # Инициализируем стартовой позицией
+        sx, sy = float(self.game.world_x), float(self.game.world_y)
+        for i in range(self.game.num_segments):
+            self.game.snake_data[i * 2] = sx
+            self.game.snake_data[i * 2 + 1] = sy
 
     def on_update(self, dt):
         # 1. ОБРАБОТКА ВВОДА (Input Phase)
@@ -64,17 +72,21 @@ class SnakeSystem(IGameSystem):
         self._update_tail()
 
     def on_render(self, canvas, t, zoom):
-        # Хвост (SnakeRenderLayer)
-        for i in range(len(self.game.segments) - 1, -1, -1):
-            s = self.game.segments[i]
-            size = 30 - (i * 0.4)
-            Color(0.2, 0.8, 0.5, 1)
-            Ellipse(pos=(s[0] - size / 2, s[1] - size / 2), size=(size, size))
+        """Отрисовка из плоского массива"""
+        # Рисуем с конца к началу
+        for i in range(self.game.num_segments - 1, -1, -1):
+            idx = i * 2
+            x = self.game.snake_data[idx]
+            y = self.game.snake_data[idx + 1]
 
-        # Голова
-        h_size = 40
-        Color(1, 0, 0, 1) if self.game.damage_timer > 0 else Color(1, 0.6, 0, 1)
-        Ellipse(pos=(self.game.world_x - 20, self.game.world_y - 20), size=(h_size, h_size))
+            size = 30 - (i * 0.4)
+            if i == 0:  # Голова
+                Color(1, 0.6, 0, 1) if self.game.damage_timer <= 0 else Color(1, 0, 0, 1)
+                size = 40
+            else:  # Тело
+                Color(0.2, 0.8, 0.5, 1)
+
+            Ellipse(pos=(x - size / 2, y - size / 2), size=(size, size))
 
     def _apply_movement_with_collisions(self, vx, vy):
         # Обращаемся к WorldSystem через основной класс игры
@@ -96,16 +108,22 @@ class SnakeSystem(IGameSystem):
             self.game.damage_timer = 0.5
 
     def _update_tail(self):
-        leader_x, leader_y = float(self.game.world_x), float(self.game.world_y)
-        for i in range(self.game.num_segments):
-            seg = self.game.segments[i]
-            dx = leader_x - seg[0]
-            dy = leader_y - seg[1]
+        # Важно: используем snake_data[0] и [1] для головы
+        self.game.snake_data[0] = float(self.game.world_x)
+        self.game.snake_data[1] = float(self.game.world_y)
+
+        for i in range(1, self.game.num_segments):
+            idx = i * 2
+            prev_idx = (i - 1) * 2
+
+            lx, ly = self.game.snake_data[prev_idx], self.game.snake_data[prev_idx + 1]
+            sx, sy = self.game.snake_data[idx], self.game.snake_data[idx + 1]
+
+            dx = lx - sx
+            dy = ly - sy
             dist = math.sqrt(dx ** 2 + dy ** 2)
 
             if dist > self.seg_dist:
                 move_dist = dist - self.seg_dist
-                seg[0] += (dx / dist) * move_dist
-                seg[1] += (dy / dist) * move_dist
-
-            leader_x, leader_y = seg[0], seg[1]
+                self.game.snake_data[idx] += (dx / dist) * move_dist
+                self.game.snake_data[idx + 1] += (dy / dist) * move_dist

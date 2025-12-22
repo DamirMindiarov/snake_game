@@ -5,6 +5,7 @@ from kivy.core.window import Window
 import time
 
 from logic.core.system_manager import SystemManager
+from logic.systems.fx_system import FXSystem
 from logic.systems.mutation_dash import MutationDashSystem
 from logic.systems.mutation_snap import MutationSnapSystem
 
@@ -38,8 +39,10 @@ class SurvivalSnakeGame(Widget):
 
         # РЕГИСТРАЦИЯ СИСТЕМ (Пока закомментировано, добавим по одной)
         self.world = self.manager.register(WorldSystem(self))
+        self.fx = self.manager.register(FXSystem(self))
         self.snake = self.manager.register(SnakeSystem(self))
         self.biomass = self.manager.register(BiomassSystem(self))
+
 
         # ПОДКЛЮЧЕНИЕ МУТАЦИИ
         self.dash_mutation = self.manager.register(MutationDashSystem(self))

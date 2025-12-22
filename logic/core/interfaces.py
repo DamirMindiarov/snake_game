@@ -16,3 +16,10 @@ class IGameSystem(ABC):
     def on_chunk_generated(self, cx, cy, chunk_data):
         """Событие создания чанка (опционально для систем)"""
         pass
+
+class IVisualEffect:
+    """Интерфейс для любого визуального эффекта"""
+    def update(self, dt): pass
+    def draw(self, canvas): pass
+    @property
+    def is_alive(self): return True
