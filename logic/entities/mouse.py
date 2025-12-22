@@ -86,13 +86,11 @@ class Mouse(IEntity):
         ))
 
     def on_catch(self):
-        # Проверяем конкретно флаг для эффектов укуса [20.1]
         if getattr(self.game, 'fx_bite_enabled', True):
             fx_sys = self.game.manager.get_system('FXSystem')
             if fx_sys:
-                from logic.effects.bite_fx import BiteEffect
-                fx_sys.spawn(BiteEffect(self.game))
+                # Просто триггерим взрыв, он сам привяжется к голове
+                fx_sys.spawn_bite()
 
-        # Логика бугорка еды (Digestion) НЕ отключается, так как это часть геймплея
         if hasattr(self.game, 'digestion_stack'):
             self.game.digestion_stack.append({'idx': 0.0, 'pwr': 1.0})
