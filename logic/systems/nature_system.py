@@ -1,5 +1,7 @@
 # logic/systems/nature_system.py
 import random
+
+from kivy.core.image import Image as CoreImage
 from kivy.graphics import Color, Rectangle, Ellipse
 from logic.core.interfaces import IGameSystem
 from logic.core.world_objects import IWorldPopulator, WORLD_OBJECTS
@@ -7,6 +9,10 @@ from logic.core.world_objects import IWorldPopulator, WORLD_OBJECTS
 
 class NatureSystem(IGameSystem, IWorldPopulator):
     def on_init(self):
+        # Загружаем текстуру заранее для оптимизации 2025
+        self.tree_tex = CoreImage("assets/tree.png").texture
+        self.tree_tex.mag_filter = 'nearest'
+        self.game.world.register_populator(self)
         # Регистрируем себя как наполнитель в системе мира
         if hasattr(self.game, 'world'):
             self.game.world.register_populator(self)
@@ -25,23 +31,24 @@ class NatureSystem(IGameSystem, IWorldPopulator):
                     chunk_map[(tx, ty)] = 2  # ID ствола дерева
 
     def draw_object(self, obj_id, tx, ty, layers, ts):
-        """Отрисовка дерева на два слоя"""
         if obj_id == 2:
             px, py = tx * ts, ty * ts
-            conf = WORLD_OBJECTS[obj_id]
 
-            # 1. Ствол (Слой 0 - под змеей)
-            layers["layer_0"].add(Color(*conf["color"]))
-            layers["layer_0"].add(Rectangle(
-                pos=(px + ts * 0.3, py + ts * 0.3),
-                size=(ts * 0.4, ts * 0.4)
-            ))
+            # 1. Устанавливаем желаемую ширину (2 тайла)
+            w = ts * 4
 
-            # 2. Крона (Слой 1 - НАД змеей)
-            layers["layer_1"].add(Color(0.1, 0.6, 0.1, 0.6))  # Полупрозрачный зеленый
-            layers["layer_1"].add(Ellipse(
-                pos=(px - ts * 0.5, py - ts * 0.5),
-                size=(ts * 2, ts * 2)
+            # 2. Считаем высоту по пропорции картинки (289 / 243 ≈ 1.19)
+            # Высота будет: ширина * (высота_ориг / ширина_ориг)
+            h = w * (289 / 243)
+
+            layers["layer_1"].add(Color(1, 1, 1, 0.7))
+            layers["layer_1"].add(Rectangle(
+                texture=self.tree_tex,
+                # Смещение:
+                # По X: центрируем относительно тайла
+                # По Y: корень дерева (низ картинки) в центре тайла + небольшой зазор
+                pos=(px - (w - ts) / 2, py + ts * 0.1),
+                size=(w, h)
             ))
 
     def on_update(self, dt):

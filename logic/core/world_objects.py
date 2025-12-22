@@ -4,13 +4,16 @@ from abc import ABC, abstractmethod
 # Свойства объектов мира (ID -> Характеристики)
 WORLD_OBJECTS = {
     0: {"name": "empty", "solid": False, "movable": False, "layer": 0},
-    1: {"name": "stone", "solid": True, "movable": True, "layer": 0, "color": (0.4, 0.4, 0.4, 1)},
-
-    # Ствол дерева (ID 2): блокирует путь, слой 0 (под змеей)
-    2: {"name": "tree_trunk", "solid": True, "movable": False, "layer": 0, "color": (0.4, 0.2, 0.1, 1)},
-
-    # Крона (ID 3): не блокирует путь, слой 1 (НАД змеей)
-    3: {"name": "tree_crown", "solid": False, "movable": False, "layer": 1, "color": (0.1, 0.6, 0.1, 0.7)}
+    1: {
+        "name": "stone",
+        "solid": True, "movable": True, "layer": 0,
+        "texture": "assets/stone.png"
+    },
+    2: {
+        "name": "tree",
+        "solid": True, "movable": False, "layer": 0,
+        "texture": "assets/tree.png"
+    }
 }
 
 class IWorldObject(ABC):
