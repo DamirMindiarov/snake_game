@@ -11,8 +11,8 @@ class MutationSnapSystem(IMutationSystem):
         return "predatory_snap"
 
     def on_init(self):
-        self.snap_radius = 250.0  # Дальность "зрения" змеи
-        self.snap_power = 25.0  # Скорость полета к мыши
+        self.snap_radius = 150.0  # Дальность "зрения" змеи
+        self.snap_power = 15.0  # Скорость полета к мыши
         self.game.snap_timer = 0.0  # Время активного прыжка
         self.snap_direction = [0.0, 0.0]
         self.cooldown = 0.0

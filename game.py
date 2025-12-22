@@ -45,11 +45,13 @@ class SurvivalSnakeGame(Widget):
         self.world = self.manager.register(WorldSystem(self))
         self.interaction = self.manager.register(InteractionSystem(self))
         self.stones = self.manager.register(StoneSystem(self))
-        self.nature = self.manager.register(NatureSystem(self))
+        # self.nature = self.manager.register(NatureSystem(self))
         self.fx = self.manager.register(FXSystem(self))
         self.snake = self.manager.register(SnakeSystem(self))
         self.debug = self.manager.register(DebugSystem(self))
         self.entity_sys = self.manager.register(EntitySystem(self))
+
+        self.fx_bite_enabled = True  # Рубильник конкретно для эффекта поедания [12.1]
 
         # Наполнители мира
         self.world.register_populator(Mouse)

@@ -18,3 +18,12 @@ class FXSystem(IGameSystem):
     def on_render(self, canvas, t, zoom):
         for e in self.active_effects:
             e.draw(canvas)
+
+    def trigger_event(self, event_type, **kwargs):
+        # Глобальный рубильник в конфиге игры [15.1]
+        if not self.game.config.get("effects_enabled", True):
+            return
+
+        if event_type == "bite":
+            from logic.effects.bite_fx import BiteEffect
+            self.spawn(BiteEffect(kwargs['anchor']))

@@ -1,6 +1,7 @@
 import random, math
 from kivy.graphics import Color, Rectangle
 from logic.core.interfaces import IEntity
+from logic.effects.bite_fx import BiteEffect
 
 
 class Mouse(IEntity):
@@ -85,6 +86,13 @@ class Mouse(IEntity):
         ))
 
     def on_catch(self):
-        if len(self.game.digestion_stack) < 6:
-            # append добавляет еду, которая будет считаться "самой свежей"
+        # Проверяем конкретно флаг для эффектов укуса [20.1]
+        if getattr(self.game, 'fx_bite_enabled', True):
+            fx_sys = self.game.manager.get_system('FXSystem')
+            if fx_sys:
+                from logic.effects.bite_fx import BiteEffect
+                fx_sys.spawn(BiteEffect(self.game))
+
+        # Логика бугорка еды (Digestion) НЕ отключается, так как это часть геймплея
+        if hasattr(self.game, 'digestion_stack'):
             self.game.digestion_stack.append({'idx': 0.0, 'pwr': 1.0})
