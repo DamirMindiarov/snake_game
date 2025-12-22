@@ -18,7 +18,7 @@ class Mouse(IEntity):
     @staticmethod
     def populate_chunk(game, cx, cy, chunk_map):
         # Возвращаем шанс 20-25% на появление мышей в чанке
-        if random.random() < 0.25:
+        if random.random() < 1:
             cs, ts = game.chunk_size, game.tile_size
 
             # Спавним всего 1-2 мыши на чанк вместо 30
@@ -85,4 +85,6 @@ class Mouse(IEntity):
         ))
 
     def on_catch(self):
-        pass
+        if len(self.game.digestion_stack) < 6:
+            # append добавляет еду, которая будет считаться "самой свежей"
+            self.game.digestion_stack.append({'idx': 0.0, 'pwr': 1.0})
