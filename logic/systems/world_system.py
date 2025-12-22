@@ -119,3 +119,21 @@ class WorldSystem(IGameSystem):
                     layer_1 = self.game.obstacles[(cx, cy)].get("layer_1")
                     if layer_1:
                         canvas.add(layer_1)
+
+    def pop_object(self, tx, ty):
+        """Вырезает объект из мира и возвращает его ID"""
+        cx, cy = tx // self.game.chunk_size, ty // self.game.chunk_size
+        chunk_map = self.game.world_map.get((cx, cy))
+        if chunk_map and (tx, ty) in chunk_map:
+            obj_id = chunk_map.pop((tx, ty))
+            self.redraw_chunk(cx, cy)
+            return obj_id
+        return None
+
+    def place_object(self, tx, ty, obj_id):
+        """Вмораживает объект обратно в статику"""
+        cx, cy = tx // self.game.chunk_size, ty // self.game.chunk_size
+        if (cx, cy) not in self.game.world_map:
+            self.game.world_map[(cx, cy)] = {}
+        self.game.world_map[(cx, cy)][(tx, ty)] = obj_id
+        self.redraw_chunk(cx, cy)

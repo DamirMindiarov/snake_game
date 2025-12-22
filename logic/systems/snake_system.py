@@ -89,23 +89,47 @@ class SnakeSystem(IGameSystem):
             Ellipse(pos=(x - size / 2, y - size / 2), size=(size, size))
 
     def _apply_movement_with_collisions(self, vx, vy):
-        # Обращаемся к WorldSystem через основной класс игры
         world = getattr(self.game, 'world', None)
+        interact = getattr(self.game, 'interaction', None)
         if not world: return
 
-        # Проверка по X
-        if not world.is_tile_solid(self.game.world_x + vx, self.game.world_y):
-            self.game.world_x += vx
-        else:
-            self.game.vel_x = 0
-            self.game.damage_timer = 0.5
+        ts = self.game.tile_size
 
-        # Проверка по Y
-        if not world.is_tile_solid(self.game.world_x, self.game.world_y + vy):
-            self.game.world_y += vy
+        # --- Проверка по X ---
+        future_x = self.game.world_x + vx
+        if not world.is_tile_solid(future_x, self.game.world_y):
+            self.game.world_x = future_x
         else:
-            self.game.vel_y = 0
-            self.game.damage_timer = 0.5
+            # Если уперлись в стену по X — пробуем толкнуть
+            tx = int((future_x + (ts / 2 if vx > 0 else -ts / 2)) // ts)
+            ty = int(self.game.world_y // ts)
+
+            direction = [1 if vx > 0 else -1, 0]
+
+            # Если InteractionSystem смогла толкнуть блок
+            if interact and interact.push_block(tx, ty, direction):
+                # Разрешаем змее немного продвинуться, пока камень отлетает
+                self.game.world_x += vx * 0.3
+            else:
+                self.game.vel_x = 0
+                self.game.damage_timer = 0.5
+
+        # --- Проверка по Y ---
+        future_y = self.game.world_y + vy
+        if not world.is_tile_solid(self.game.world_x, future_y):
+            self.game.world_y = future_y
+        else:
+            # Если уперлись в стену по Y — пробуем толкнуть
+            tx = int(self.game.world_x // ts)
+            ty = int((future_y + (ts / 2 if vy > 0 else -ts / 2)) // ts)
+
+            direction = [0, 1 if vy > 0 else -1]
+
+            if interact and interact.push_block(tx, ty, direction):
+                self.game.world_y += vy * 0.3
+            else:
+                self.game.vel_y = 0
+                self.game.damage_timer = 0.5
 
     def _update_tail(self):
         # Важно: используем snake_data[0] и [1] для головы
