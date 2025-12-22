@@ -27,6 +27,23 @@ class GameInterfaceManager:
             opacity=0
         )
 
+        self.zoom_in_btn = MDIconButton(
+            icon="magnify-plus",
+            pos_hint={"right": 0.98, "center_y": 0.55},
+            md_bg_color=(0, 0, 0, 0.3),
+            on_release=lambda x: self.change_zoom(0.1)
+        )
+
+        self.zoom_out_btn = MDIconButton(
+            icon="magnify-minus",
+            pos_hint={"right": 0.98, "center_y": 0.45},
+            md_bg_color=(0, 0, 0, 0.3),
+            on_release=lambda x: self.change_zoom(-0.1)
+        )
+
+        screen.add_widget(self.zoom_in_btn)
+        screen.add_widget(self.zoom_out_btn)
+
 
         # Статус для игры
         self.is_open = False
@@ -74,4 +91,14 @@ class GameInterfaceManager:
 
     def is_menu_open(self):
         return self.is_open
+
+    def change_zoom(self, delta):
+        from kivymd.app import MDApp
+        game = MDApp.get_running_app().game
+
+        # Плавное изменение с границами
+        new_zoom = game.camera_zoom + delta
+        # Ограничиваем зум от 0.3 (далеко) до 1.5 (близко)
+        game.camera_zoom = max(0.3, min(1.5, new_zoom))
+        print(f"Zoom changed to: {game.camera_zoom}")
 

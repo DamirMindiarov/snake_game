@@ -33,20 +33,13 @@ class NatureSystem(IGameSystem, IWorldPopulator):
     def draw_object(self, obj_id, tx, ty, layers, ts):
         if obj_id == 2:
             px, py = tx * ts, ty * ts
-
-            # 1. Устанавливаем желаемую ширину (2 тайла)
             w = ts * 4
-
-            # 2. Считаем высоту по пропорции картинки (289 / 243 ≈ 1.19)
-            # Высота будет: ширина * (высота_ориг / ширина_ориг)
-            h = w * (289 / 243)
+            # Новая пропорция: 304 / 256 = 1.1875
+            h = w * 1.1875
 
             layers["layer_1"].add(Color(1, 1, 1, 0.7))
             layers["layer_1"].add(Rectangle(
                 texture=self.tree_tex,
-                # Смещение:
-                # По X: центрируем относительно тайла
-                # По Y: корень дерева (низ картинки) в центре тайла + небольшой зазор
                 pos=(px - (w - ts) / 2, py + ts * 0.1),
                 size=(w, h)
             ))
