@@ -5,6 +5,8 @@ from kivy.core.window import Window
 import time
 
 from logic.core.system_manager import SystemManager
+from logic.systems.mutation_dash import MutationDashSystem
+from logic.systems.mutation_snap import MutationSnapSystem
 
 # Импорты будущих систем (создадим их в следующих шагах)
 from logic.systems.world_system import WorldSystem
@@ -23,7 +25,13 @@ class SurvivalSnakeGame(Widget):
         self.touch_screen_pos = [0.0, 0.0]
         self.biomass_points = 0
         self.damage_timer = 0.0
-        self.mutations = {"predatory_snap": False}
+
+        # КРИТИЧНО: Словарь мутаций должен быть здесь!
+        self.mutations = {
+            "predatory_snap": False,
+            "dash": False
+        }
+
 
         # Менеджер систем
         self.manager = SystemManager(self)
@@ -32,6 +40,10 @@ class SurvivalSnakeGame(Widget):
         self.world = self.manager.register(WorldSystem(self))
         self.snake = self.manager.register(SnakeSystem(self))
         self.biomass = self.manager.register(BiomassSystem(self))
+
+        # ПОДКЛЮЧЕНИЕ МУТАЦИИ
+        self.dash_mutation = self.manager.register(MutationDashSystem(self))
+        self.snap_mut = self.manager.register(MutationSnapSystem(self))
 
     def update(self, dt):
         self.manager.update_all(dt)
