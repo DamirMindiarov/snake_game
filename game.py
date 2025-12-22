@@ -8,6 +8,8 @@ from logic.core.system_manager import SystemManager
 from logic.systems.fx_system import FXSystem
 from logic.systems.mutation_dash import MutationDashSystem
 from logic.systems.mutation_snap import MutationSnapSystem
+from logic.systems.nature_system import NatureSystem
+from logic.systems.stone_system import StoneSystem
 
 # Импорты будущих систем (создадим их в следующих шагах)
 from logic.systems.world_system import WorldSystem
@@ -39,6 +41,8 @@ class SurvivalSnakeGame(Widget):
 
         # РЕГИСТРАЦИЯ СИСТЕМ (Пока закомментировано, добавим по одной)
         self.world = self.manager.register(WorldSystem(self))
+        self.stones = self.manager.register(StoneSystem(self))  # Камни теперь тут
+        self.nature = self.manager.register(NatureSystem(self))  # Деревья тут
         self.fx = self.manager.register(FXSystem(self))
         self.snake = self.manager.register(SnakeSystem(self))
         self.biomass = self.manager.register(BiomassSystem(self))
@@ -56,19 +60,27 @@ class SurvivalSnakeGame(Widget):
         self.canvas.clear()
         t = time.time()
 
-        # 1. Фон (теперь рисуем здесь или вынесем в BackgroundSystem)
+        # 1. Фоновая заливка (экранные координаты)
         with self.canvas:
             Color(0.18, 0.28, 0.18, 1)
             Rectangle(pos=(0, 0), size=(Window.width, Window.height))
 
-        # 2. Отрисовка систем в мировых координатах
+        # 2. Мировой рендеринг (координаты игры)
         with self.canvas:
             PushMatrix()
+            # Центрируем камеру на игроке
             Translate(Window.width / 2, Window.height / 2, 0)
             Scale(self.camera_zoom, self.camera_zoom, 1)
             Translate(-self.world_x, -self.world_y, 0)
 
+            # А. Отрисовка всех стандартных систем:
+            # Слой 0 мира (камни, стволы), еда, эффекты, змея
             self.manager.render_all(self.canvas, t, self.camera_zoom)
+
+            # Б. Отрисовка верхнего слоя (кроны деревьев):
+            # Вызываем метод напрямую у WorldSystem, чтобы он перекрыл змею
+            if hasattr(self, 'world'):
+                self.world.draw_upper_layer(self.canvas)
 
             PopMatrix()
 
