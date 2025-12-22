@@ -27,7 +27,7 @@ class StoneSystem(IGameSystem, IWorldPopulator):
         if hasattr(self.game, 'world'):
             self.game.world.register_populator(self)
 
-    def populate_chunk(self, cx, cy, chunk_map):
+    def populate_chunk(self, cx, cy, chunk_map, game=None):
         """Логика расстановки камней (остается без изменений)"""
         cs = self.game.chunk_size
         if random.random() < 0.7:

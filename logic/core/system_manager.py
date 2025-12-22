@@ -8,6 +8,13 @@ class SystemManager:
         self.systems.append(system_instance)
         return system_instance
 
+    def get_system(self, system_name):
+        """Находит систему по имени её класса"""
+        for s in self.systems:
+            if s.__class__.__name__ == system_name:
+                return s
+        return None
+
     def update_all(self, dt):
         for s in self.systems:
             s.on_update(dt)
@@ -20,11 +27,8 @@ class SystemManager:
         for s in self.systems:
             s.on_chunk_generated(cx, cy, chunk_data)
 
-    # УНИВЕРСАЛЬНЫЙ ТРАНСЛЯТОР СОБЫТИЙ
     def post_event(self, event_name, *args):
-        """Отправляет любое событие всем системам, у которых есть такой метод"""
         for s in self.systems:
-            # Например, если event_name='on_touch_down', ищем метод on_touch_down
             method = getattr(s, event_name, None)
             if method:
                 method(*args)

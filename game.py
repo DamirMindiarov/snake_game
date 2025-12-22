@@ -5,8 +5,10 @@ from kivy.core.window import Window
 import time
 
 from logic.core.system_manager import SystemManager
+from logic.entities.mouse import Mouse
 from logic.systems.InteractionSystem import InteractionSystem
 from logic.systems.debug_system import DebugSystem
+from logic.systems.entity_system import EntitySystem
 from logic.systems.fx_system import FXSystem
 from logic.systems.mutation_dash import MutationDashSystem
 from logic.systems.mutation_snap import MutationSnapSystem
@@ -33,28 +35,28 @@ class SurvivalSnakeGame(Widget):
 
         # КРИТИЧНО: Словарь мутаций должен быть здесь!
         self.mutations = {
-            "predatory_snap": False,
-            "dash": False
+            "predatory_snap": True,
+            "dash": True
         }
 
-
-        # Менеджер систем
         self.manager = SystemManager(self)
 
-        # РЕГИСТРАЦИЯ СИСТЕМ (Пока закомментировано, добавим по одной)
+        # Регистрация систем (Мир, Физика, Графика)
         self.world = self.manager.register(WorldSystem(self))
         self.interaction = self.manager.register(InteractionSystem(self))
-
-        self.stones = self.manager.register(StoneSystem(self))  # Камни теперь тут
-        self.nature = self.manager.register(NatureSystem(self))  # Деревья тут
-
+        self.stones = self.manager.register(StoneSystem(self))
+        self.nature = self.manager.register(NatureSystem(self))
         self.fx = self.manager.register(FXSystem(self))
         self.snake = self.manager.register(SnakeSystem(self))
         self.debug = self.manager.register(DebugSystem(self))
+        self.entity_sys = self.manager.register(EntitySystem(self))
 
-        # ПОДКЛЮЧЕНИЕ МУТАЦИИ
+        # Наполнители мира
+        self.world.register_populator(Mouse)
+
+        # РЕГИСТРАЦИЯ МУТАЦИЙ (теперь они используют свои ID для проверки)
+        self.snap_mut = self.manager.register(MutationSnapSystem(self))
         self.dash_mutation = self.manager.register(MutationDashSystem(self))
-        # self.snap_mut = self.manager.register(MutationSnapSystem(self))
 
     def update(self, dt):
         self.manager.update_all(dt)

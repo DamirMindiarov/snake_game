@@ -17,7 +17,7 @@ class NatureSystem(IGameSystem, IWorldPopulator):
         if hasattr(self.game, 'world'):
             self.game.world.register_populator(self)
 
-    def populate_chunk(self, cx, cy, chunk_map):
+    def populate_chunk(self, cx, cy, chunk_map, game=None):
         """Логика расстановки деревьев в сетку"""
         cs = self.game.chunk_size
         # Генерируем 3-7 деревьев на чанк

@@ -13,6 +13,10 @@ class IMutationSystem(IGameSystem):
         """Должен совпадать с ключом в MUTATIONS_CONFIG"""
         pass
 
+    # def is_active(self):
+    #     """Проверяет состояние напрямую в конфиге"""
+    #     return MUTATIONS_CONFIG.get(self.mutation_id, {}).get("active", False)
+
     def is_active(self):
-        """Проверяет состояние напрямую в конфиге"""
-        return MUTATIONS_CONFIG.get(self.mutation_id, {}).get("active", False)
+        return self.game.mutations.get(self.mutation_id, False)
+

@@ -28,22 +28,60 @@ class SnakeSystem(IGameSystem):
             self.game.snake_data[i * 2] = sx
             self.game.snake_data[i * 2 + 1] = sy
 
+    # def on_update(self, dt):
+    #     # 1. ОБРАБОТКА ВВОДА (Input Phase)
+    #     # Переносим логику из GameLoop сюда, чтобы змея знала, куда ползти
+    #     if self.game.is_touching:
+    #         zoom = getattr(self.game, 'camera_zoom', 1.0)
+    #
+    #         # Центрируем экранные координаты относительно центра окна
+    #         rel_x = self.game.touch_screen_pos[0] - Window.width / 2
+    #         rel_y = self.game.touch_screen_pos[1] - Window.height / 2
+    #
+    #         # Устанавливаем цель в мировых координатах
+    #         self.game.target_x = self.game.world_x + (rel_x / zoom)
+    #         self.game.target_y = self.game.world_y + (rel_y / zoom)
+    #
+    #     # 2. ФИЗИКА (Inertia Phase)
+    #     if self.game.is_touching:
+    #         dx = self.game.target_x - self.game.world_x
+    #         dy = self.game.target_y - self.game.world_y
+    #         dist = math.sqrt(dx ** 2 + dy ** 2)
+    #
+    #         if dist > 5:
+    #             self.game.vel_x += (dx / dist) * self.accel
+    #             self.game.vel_y += (dy / dist) * self.accel
+    #
+    #     # Адаптивное трение
+    #     v_sq = self.game.vel_x ** 2 + self.game.vel_y ** 2
+    #     current_friction = 0.85 if v_sq > 100 else self.friction
+    #     self.game.vel_x *= current_friction
+    #     self.game.vel_y *= current_friction
+    #
+    #     # Ограничение скорости
+    #     v_current = math.sqrt(v_sq)
+    #     if v_current > self.max_v:
+    #         scale = self.max_v / v_current
+    #         self.game.vel_x *= scale
+    #         self.game.vel_y *= scale
+    #
+    #     # 2. КОЛЛИЗИИ СО СКОЛЬЖЕНИЕМ (Бывший CollisionMixin)
+    #     self._apply_movement_with_collisions(self.game.vel_x, self.game.vel_y)
+    #
+    #     # 3. ХВОСТ (Бывший SnakeMovementMixin - Векторная модель)
+    #     self._update_tail()
     def on_update(self, dt):
-        # 1. ОБРАБОТКА ВВОДА (Input Phase)
-        # Переносим логику из GameLoop сюда, чтобы змея знала, куда ползти
-        if self.game.is_touching:
-            zoom = getattr(self.game, 'camera_zoom', 1.0)
+        # 0. ПРОВЕРКА ФОРСАЖА (Dash/Snap) [15.1]
+        is_dashing = getattr(self.game, 'dash_timer', 0) > 0
 
-            # Центрируем экранные координаты относительно центра окна
+        # 1. ОБРАБОТКА ВВОДА (Только если не летим в рывке)
+        if self.game.is_touching and not is_dashing:
+            zoom = getattr(self.game, 'camera_zoom', 1.0)
             rel_x = self.game.touch_screen_pos[0] - Window.width / 2
             rel_y = self.game.touch_screen_pos[1] - Window.height / 2
-
-            # Устанавливаем цель в мировых координатах
             self.game.target_x = self.game.world_x + (rel_x / zoom)
             self.game.target_y = self.game.world_y + (rel_y / zoom)
 
-        # 2. ФИЗИКА (Inertia Phase)
-        if self.game.is_touching:
             dx = self.game.target_x - self.game.world_x
             dy = self.game.target_y - self.game.world_y
             dist = math.sqrt(dx ** 2 + dy ** 2)
@@ -52,23 +90,29 @@ class SnakeSystem(IGameSystem):
                 self.game.vel_x += (dx / dist) * self.accel
                 self.game.vel_y += (dy / dist) * self.accel
 
-        # Адаптивное трение
+        # 2. ТРЕНИЕ И ЛИМИТЫ (Отключаем во время рывка) [12.1]
         v_sq = self.game.vel_x ** 2 + self.game.vel_y ** 2
-        current_friction = 0.85 if v_sq > 100 else self.friction
-        self.game.vel_x *= current_friction
-        self.game.vel_y *= current_friction
 
-        # Ограничение скорости
-        v_current = math.sqrt(v_sq)
-        if v_current > self.max_v:
-            scale = self.max_v / v_current
-            self.game.vel_x *= scale
-            self.game.vel_y *= scale
+        if not is_dashing:
+            # Обычное трение
+            current_friction = 0.85 if v_sq > 100 else self.friction
+            self.game.vel_x *= current_friction
+            self.game.vel_y *= current_friction
 
-        # 2. КОЛЛИЗИИ СО СКОЛЬЖЕНИЕМ (Бывший CollisionMixin)
+            # Обычный лимит скорости (9.0)
+            v_current = math.sqrt(v_sq)
+            if v_current > self.max_v:
+                scale = self.max_v / v_current
+                self.game.vel_x *= scale
+                self.game.vel_y *= scale
+        else:
+            # Во время рывка (Snap/Dash) позволяем лететь на высокой скорости
+            # Но чуть-чуть притормаживаем, чтобы не улететь в бесконечность
+            self.game.vel_x *= 0.98
+            self.game.vel_y *= 0.98
+
+        # 3. ДВИЖЕНИЕ И ХВОСТ
         self._apply_movement_with_collisions(self.game.vel_x, self.game.vel_y)
-
-        # 3. ХВОСТ (Бывший SnakeMovementMixin - Векторная модель)
         self._update_tail()
 
     def on_render(self, canvas, t, zoom):
