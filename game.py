@@ -6,6 +6,7 @@ import time
 
 from logic.core.system_manager import SystemManager
 from logic.systems.InteractionSystem import InteractionSystem
+from logic.systems.debug_system import DebugSystem
 from logic.systems.fx_system import FXSystem
 from logic.systems.mutation_dash import MutationDashSystem
 from logic.systems.mutation_snap import MutationSnapSystem
@@ -49,7 +50,7 @@ class SurvivalSnakeGame(Widget):
 
         self.fx = self.manager.register(FXSystem(self))
         self.snake = self.manager.register(SnakeSystem(self))
-
+        self.debug = self.manager.register(DebugSystem(self))
 
         # ПОДКЛЮЧЕНИЕ МУТАЦИИ
         self.dash_mutation = self.manager.register(MutationDashSystem(self))

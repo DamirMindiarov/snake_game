@@ -1,4 +1,6 @@
 # interface/menu_drawer.py
+from kivy.clock import Clock
+from kivy.metrics import dp
 from kivymd.uix.floatlayout import MDFloatLayout
 from kivymd.uix.button import MDIconButton, MDRaisedButton, MDFillRoundFlatButton
 from kivymd.uix.label import MDLabel
@@ -40,6 +42,23 @@ class GameInterfaceManager:
             md_bg_color=(0, 0, 0, 0.3),
             on_release=lambda x: self.change_zoom(-0.1)
         )
+
+        # Метка мониторинга в ПРАВОМ верхнем углу
+        self.fps_label = MDLabel(
+            text="FPS: 0 | ENT: 0",
+            # right: 0.98 прижимает к правому краю, top: 0.98 к верхнему
+            pos_hint={"right": 0.98, "top": 0.98},
+            size_hint=(None, None),
+            size=(dp(200), dp(40)),
+            halign="right",  # Текст выравниваем по правому краю
+            theme_text_color="Custom",
+            text_color=(0, 1, 0, 1),
+            font_style="Caption",
+            bold=True
+        )
+        screen.add_widget(self.fps_label)
+        # Запускаем цикл обновления (раз в 0.5 сек)
+        Clock.schedule_interval(self.update_debug_data, 0.5)
 
         screen.add_widget(self.zoom_in_btn)
         screen.add_widget(self.zoom_out_btn)
@@ -101,4 +120,21 @@ class GameInterfaceManager:
         # Ограничиваем зум от 0.3 (далеко) до 1.5 (близко)
         game.camera_zoom = max(0.3, min(1.5, new_zoom))
         print(f"Zoom changed to: {game.camera_zoom}")
+
+    def update_debug_data(self, dt):
+        from kivymd.app import MDApp
+        app = MDApp.get_running_app()
+        if not hasattr(app, 'game'): return
+
+        fps = Clock.get_fps()
+        # Проверяем количество сущностей (используй имя списка из твоего кода)
+        ent_count = len(getattr(app.game, 'active_entities', []))
+
+        self.fps_label.text = f"FPS: {int(fps)} | ENT: {ent_count}"
+
+        # Визуальная диагностика [15.1]
+        if fps < 45:
+            self.fps_label.text_color = (1, 0, 0, 1)  # Красный - есть проблема
+        else:
+            self.fps_label.text_color = (0, 1, 0, 1)  # Зеленый - всё летит
 
