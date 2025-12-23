@@ -126,15 +126,29 @@ class GameInterfaceManager:
         app = MDApp.get_running_app()
         if not hasattr(app, 'game'): return
 
+        game = app.game
         fps = Clock.get_fps()
-        # Проверяем количество сущностей (используй имя списка из твоего кода)
-        ent_count = len(getattr(app.game, 'active_entities', []))
+        ent_count = len(getattr(game, 'active_entities', []))
 
-        self.fps_label.text = f"FPS: {int(fps)} | ENT: {ent_count}"
+        # АУДИТ УТЕЧКИ (Считаем инструкции на всех холстах) [15.1]
+        # 1. Инструкции главного холста игры
+        total_instr = len(game.canvas.children)
+
+        # 2. Инструкции во всех системах (Snake, Entity, FX и др.)
+        # Именно здесь в on_render скапливается мусор без canvas.clear() [12.1]
+        if hasattr(game, 'manager'):
+            for system in game.manager.systems:
+                if hasattr(system, 'canvas'):
+                    total_instr += len(system.canvas.children)
+
+        # Выводим расширенную инфу
+        self.fps_label.text = f"FPS: {int(fps)} | ENT: {ent_count} | INST: {total_instr}"
 
         # Визуальная диагностика [15.1]
         if fps < 45:
-            self.fps_label.text_color = (1, 0, 0, 1)  # Красный - есть проблема
+            self.fps_label.text_color = (1, 0, 0, 1)  # Красный - тормоза
+        elif total_instr > 5000:
+            self.fps_label.text_color = (1, 1, 0, 1)  # Желтый - риск утечки
         else:
-            self.fps_label.text_color = (0, 1, 0, 1)  # Зеленый - всё летит
+            self.fps_label.text_color = (0, 1, 0, 1)  # Зеленый - ок
 
